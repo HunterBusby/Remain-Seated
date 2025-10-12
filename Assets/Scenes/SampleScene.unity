@@ -914,6 +914,7 @@ GameObject:
   - component: {fileID: 1556124886}
   - component: {fileID: 1556124885}
   - component: {fileID: 1556124884}
+  - component: {fileID: 1556124888}
   m_Layer: 0
   m_Name: WheelChairBound
   m_TagString: Untagged
@@ -928,7 +929,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1556124883}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d16690c14fd86ce4a948f88c8c17a707, type: 3}
   m_Name: 
@@ -942,11 +943,12 @@ MonoBehaviour:
   maxSpeed: 5
   maxTurnSpeed: 2
   playerCamera: {fileID: 330585546}
-  cameraFollowSmooth: 5
+  cameraFollowSmooth: 1
   mouseSensitivity: 10
   minVertical: -30
   maxVertical: 30
   maxHorizontal: 60
+  mainCamera: {fileID: 330585545}
 --- !u!136 &1556124885
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1013,6 +1015,34 @@ Transform:
   - {fileID: 330585546}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1556124888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1556124883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 736aae6fe3916dc48a573d9d06429766, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WheelChair_Test
+  leftWheelAction: {fileID: -9108099597821701419, guid: 74231e6de7068914f97a5a0b562c5804, type: 3}
+  rightWheelAction: {fileID: -6668309582263193387, guid: 74231e6de7068914f97a5a0b562c5804, type: 3}
+  scrollAction: {fileID: 1757591586408808879, guid: 74231e6de7068914f97a5a0b562c5804, type: 3}
+  cameraAction: {fileID: -7397415879469489106, guid: 74231e6de7068914f97a5a0b562c5804, type: 3}
+  wheelForce: 100
+  turnForce: 50
+  maxSpeed: 5
+  maxTurnSpeed: 2
+  playerCamera: {fileID: 330585546}
+  cameraFollowSmooth: 5
+  cameraOffset: {x: 0, y: 1, z: 0}
+  mouseSensitivity: 10
+  minVertical: -30
+  maxVertical: 30
+  maxHorizontal: 60
+  mainCamera: {fileID: 330585545}
 --- !u!1 &1840414809
 GameObject:
   m_ObjectHideFlags: 0

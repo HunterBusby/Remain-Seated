@@ -42,6 +42,7 @@ public class WheelchairController : MonoBehaviour
     [SerializeField] private float maxHorizontal = 60f; // to limit horizontal rotation
     private float baseYaw = 0f; // initial yaw of the chair
     private float basePitch = 0f; // initial pitch of the chair
+    public Camera mainCamera; // reference to the main camera for raycasting
 
     private void Start()
     {
@@ -201,23 +202,23 @@ public class WheelchairController : MonoBehaviour
         // Combine both rotations in one quaternion
         // this changes the rotation of the chair  base on the input from the mouse after they have been clamped
         Quaternion combinedRotation = Quaternion.Euler(basePitch + xRotation, baseYaw + yRotation, 0f);
-        transform.rotation = combinedRotation; // apply rotation to the chair
+        mainCamera.transform.rotation = combinedRotation; // apply rotation to the chair
     }
 
     private void CameraDetection() // raycast to detect objects in front of camera
     {
-        Vector3 fwd = transform.TransformDirection(Vector3.forward); // get forward direction of chair
+        Vector3 fwd = mainCamera.transform.TransformDirection(Vector3.forward); // get forward direction of chair
         
-        if (Physics.Raycast(transform.position, fwd, out RaycastHit hit, 100f)) // raycast from chair position forward
+        if (Physics.Raycast(mainCamera.transform.position, fwd, out RaycastHit hit, 100f)) // raycast from chair position forward
         {
          
             Debug.Log("Hit" + hit.collider.name); // log the name of the object hit by the raycast for testing
             
-            Debug.DrawRay(playerCamera.position,fwd * hit.distance, Color.red); // draw red ray to show hit to show in editor what was hit
+            Debug.DrawRay(mainCamera.transform.position,fwd * hit.distance, Color.red); // draw red ray to show hit to show in editor what was hit
         }
         else
         {
-            Debug.DrawRay(playerCamera.position, fwd * 10f, Color.green); // if nothing is hit, draw green ray to show in editor
+            Debug.DrawRay(mainCamera.transform.position, fwd * 10f, Color.green); // if nothing is hit, draw green ray to show in editor
         }
     }
 }
