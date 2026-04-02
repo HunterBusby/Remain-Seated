@@ -66,5 +66,5 @@
     "explorer.fileNesting.patterns": {
         "*.sln": "*.csproj"
     },
-    "dotnet.defaultSolution": "Remain-Seated.sln"
+    "dotnet.defaultSolution": "Remain-Seated.slnx"
 }
