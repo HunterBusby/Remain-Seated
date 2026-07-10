@@ -1,0 +1,14 @@
+   {
+    "entries": [
+      { "key": "Warning_1", "value": "It would be a bad idea to go here." },
+
+
+      { "key": "Note_1", "value": "This is the first note" },
+      { "key": "Note_2", "value": "This is the second note" },
+      { "key": "Note_3", "value": "This is the third note" },
+
+
+      { "key": "End of Line", "value": "Don't move Past ME!" }
+
+    ]
+  }  

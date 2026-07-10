@@ -48,7 +48,7 @@ public class WheelChair_Test : MonoBehaviour
     public TextMeshProUGUI tmpText;
 
     [Header("Raycast Settings")]
-    public float detectionRange = 0f;
+    public float detectionRange = 5f;
 
     private int soundCounter = 0; // ---------------- sound test only --------------
     public int numberoftimesToInvoke = 6; // ---------------- sound test only --------------

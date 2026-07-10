@@ -11,30 +11,40 @@ public class BrightnessController : MonoBehaviour
     [Header("UI Slider References")]
     [SerializeField] private Slider brightnessSlider;
     [SerializeField] private Slider saturationSlider;
+    [SerializeField] private Slider gammaSlider;
 
     private ColorAdjustments colorAdjustments;
+    private LiftGammaGain liftGammaGain;
 
     private void Start()
     {
-        // Make sure the Volume and sliders are assigned
         if (globalVolume == null)
         {
             Debug.LogError("Global Volume not assigned in BrightnessController.");
             return;
         }
 
-        // Try to grab the ColorAdjustments override from the Volume
-        if (!globalVolume.profile.TryGet(out colorAdjustments))
+        if (globalVolume.profile == null)
         {
-            Debug.LogError("No ColorAdjustments override found in Volume Profile!");
+            Debug.LogError("No Volume Profile assigned on the Volume.");
             return;
         }
 
-        // Initialize slider listeners (only if sliders exist)
+        if (!globalVolume.profile.TryGet(out colorAdjustments))
+        {
+            Debug.LogError("No ColorAdjustments override found in Volume Profile.");
+            return;
+        }
+
+        if (!globalVolume.profile.TryGet(out liftGammaGain))
+        {
+            Debug.LogError("No LiftGammaGain override found in Volume Profile. Add 'Lift, Gamma, Gain' to the Volume Profile.");
+            return;
+        }
+
         if (brightnessSlider != null)
         {
             brightnessSlider.onValueChanged.AddListener(SetBrightness);
-            // Optional: sync current value
             brightnessSlider.value = colorAdjustments.postExposure.value;
         }
 
@@ -42,6 +52,12 @@ public class BrightnessController : MonoBehaviour
         {
             saturationSlider.onValueChanged.AddListener(SetSaturation);
             saturationSlider.value = colorAdjustments.saturation.value;
+        }
+
+        if (gammaSlider != null)
+        {
+            gammaSlider.onValueChanged.AddListener(SetGamma);
+            gammaSlider.value = liftGammaGain.gamma.value.w;
         }
     }
 
@@ -58,6 +74,16 @@ public class BrightnessController : MonoBehaviour
         if (colorAdjustments != null)
         {
             colorAdjustments.saturation.value = value;
+        }
+    }
+
+    public void SetGamma(float value)
+    {
+        if (liftGammaGain != null)
+        {
+            Vector4 gammaValue = liftGammaGain.gamma.value;
+            gammaValue.w = value;
+            liftGammaGain.gamma.value = gammaValue;
         }
     }
 }
