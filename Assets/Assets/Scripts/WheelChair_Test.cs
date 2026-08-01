@@ -1,8 +1,8 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using TMPro;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 public class WheelChair_Test : MonoBehaviour
 {
@@ -44,8 +44,10 @@ public class WheelChair_Test : MonoBehaviour
 
     public Camera mainCamera;
 
-    [Header("UI Prompt")]
-    public TextMeshProUGUI tmpText;
+    [Header("Center Reticle")]
+    [SerializeField] private Image reticleImage;
+    [SerializeField] private Sprite defaultReticle;
+    [SerializeField] private Sprite interactionReticle;
 
     [Header("Raycast Settings")]
     public float detectionRange = 5f;
@@ -81,9 +83,8 @@ public class WheelChair_Test : MonoBehaviour
 
     private void Start()
     {
-        if (tmpText) tmpText.text = "";
-
-        // Set once at start; call SetmouseSensitivity() from your Apply button/UI when needed.
+        
+        SetReticle(false);
         SetmouseSensitivity();
     }
 
@@ -243,69 +244,123 @@ public class WheelChair_Test : MonoBehaviour
         );
     }
 
+    private void SetReticle(bool lookingAtTarget)
+    {
+        if (reticleImage == null)
+        return;
+        
+        reticleImage.sprite = lookingAtTarget
+          ? interactionReticle
+            : defaultReticle;
+            
+    }
+
+
+
     // ---------------- Detection (Raycast) ----------------
     private void CameraDetection()
+{
+    if (mainCamera == null)
+        return;
+
+    Vector3 rayDirection = mainCamera.transform.forward;
+
+    // Drop the held object without needing to look directly at it.
+    if (pickupAction != null &&
+        pickupAction.action.WasPressedThisFrame() &&
+        isHolding &&
+        heldObject != null)
     {
-        if (!mainCamera) return;
+        DropHeldObject();
+        return;
+    }
 
-        Vector3 fwd = mainCamera.transform.forward;
+    if (Physics.Raycast(
+        mainCamera.transform.position,
+        rayDirection,
+        out RaycastHit hit,
+        detectionRange))
+    {
+        Debug.DrawRay(
+            mainCamera.transform.position,
+            rayDirection * hit.distance,
+            Color.red
+        );
 
-        // If player presses pickup while already holding, drop immediately (no need to be looking at the object)
-        if (pickupAction && pickupAction.action.WasPressedThisFrame() && isHolding && heldObject != null)
+        Interactable interactable =
+            hit.collider.GetComponent<Interactable>();
+
+        LookAT lookAt =
+            hit.collider.GetComponent<LookAT>();
+
+        bool isInteractable = interactable != null;
+        bool isPickup = hit.collider.CompareTag("Pick-Up");
+
+        bool isLookAtTarget =
+            lookAt != null &&
+            hit.collider.CompareTag("Look-at");
+
+        // Change the center icon.
+        SetReticle(
+            isInteractable ||
+            isPickup ||
+            isLookAtTarget
+        );
+
+        // Interact with the object.
+        if (isInteractable &&
+            interactAction != null &&
+            interactAction.action.WasPressedThisFrame())
         {
-            DropHeldObject();
-            return;
+            Debug.Log(
+                "Interacting with: " + hit.collider.name
+            );
+
+            interactable.Interact();
         }
 
-        if (Physics.Raycast(mainCamera.transform.position, fwd, out RaycastHit hit, detectionRange))
+        // Trigger LookAT objects.
+        if (isLookAtTarget)
         {
-            Debug.DrawRay(mainCamera.transform.position, fwd * hit.distance, Color.red);
-
-            Interactable interactable = hit.collider.GetComponent<Interactable>();
-            LookAT lookAt = hit.collider.GetComponent<LookAT>();
-
-            // ===================== UI prompt =====================
-            if (tmpText)
-                tmpText.text = (interactable != null) ? "Interact\n   (E)" : "";
-
-            // ===================== interact =====================
-            if (interactable && interactAction && interactAction.action.WasPressedThisFrame())
+            if (hit.collider.gameObject != lastLookAtObject)
             {
-                Debug.DrawRay(mainCamera.transform.position, fwd * detectionRange, Color.blue);
-                Debug.Log("Interacting with: " + hit.collider.name);
-                interactable.Interact();
-            }
-
-            // ===================== look at =====================
-            if (lookAt && hit.collider.CompareTag("Look-at"))
-            {
-                if (hit.collider.gameObject != lastLookAtObject)
-                {
-                    lookAt.LookedAt();
-                    lastLookAtObject = hit.collider.gameObject;
-                }
-            }
-            else
-            {
-                lastLookAtObject = null;
-            }
-
-            // ===================== pick up =====================
-            if (pickupAction && pickupAction.action.WasPressedThisFrame() && !isHolding && hit.collider.CompareTag("Pick-Up"))
-            {
-                Rigidbody rbhit = hit.collider.GetComponent<Rigidbody>();
-                if (rbhit != null)
-                    PickUpObject(rbhit);
+                lookAt.LookedAt();
+                lastLookAtObject =
+                    hit.collider.gameObject;
             }
         }
         else
         {
-            Debug.DrawRay(mainCamera.transform.position, fwd * detectionRange, Color.green);
             lastLookAtObject = null;
+        }
 
-            if (tmpText) tmpText.text = "";
+        // Pick up objects.
+        if (pickupAction != null &&
+            pickupAction.action.WasPressedThisFrame() &&
+            !isHolding &&
+            isPickup)
+        {
+            Rigidbody targetRigidbody =
+                hit.collider.GetComponent<Rigidbody>();
+
+            if (targetRigidbody != null)
+            {
+                PickUpObject(targetRigidbody);
+            }
         }
     }
+    else
+    {
+        Debug.DrawRay(
+            mainCamera.transform.position,
+            rayDirection * detectionRange,
+            Color.green
+        );
+
+        SetReticle(false);
+        lastLookAtObject = null;
+    }
+}
 
     private void PickUpObject(Rigidbody target)
     {
